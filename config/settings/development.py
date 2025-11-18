@@ -61,3 +61,10 @@ LOGGING = {
         },
     },
 }
+
+# Channels (WebSockets) - InMemory para desarrollo sin Redis
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    },
+}
