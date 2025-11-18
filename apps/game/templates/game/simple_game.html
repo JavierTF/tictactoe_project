@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicTacToe</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f3f4f6;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            text-align: center;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            max-width: 400px;
+        }
+        
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 2rem;
+        }
+        
+        .status {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            min-height: 30px;
+        }
+        
+        .winner {
+            background: #d1fae5;
+            border: 2px solid #34d399;
+            padding: 10px;
+            border-radius: 5px;
+            color: #065f46;
+        }
+        
+        .draw {
+            background: #f3f4f6;
+            border: 2px solid #9ca3af;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .symbol-x { color: #3b82f6; }
+        .symbol-o { color: #f97316; }
+        
+        button.reset {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        button.reset:hover {
+            background: #2563eb;
+        }
+        
+        .board-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-template-rows: repeat(3, 120px);
+            gap: 10px;
+        }
+        
+        .cell {
+            width: 120px;
+            height: 120px;
+            font-size: 4rem;
+            font-weight: bold;
+            border: 4px solid #d1d5db;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .cell:hover:not(.occupied) {
+            background: #f3f4f6;
+            transform: scale(1.05);
+        }
+        
+        .cell.occupied {
+            cursor: not-allowed;
+            background: #f9fafb;
+        }
+        
+        .cell.x { border-color: #60a5fa; }
+        .cell.o { border-color: #fb923c; }
+        
+        .move-count {
+            margin-top: 20px;
+            color: #6b7280;
+        }
+        
+        .admin-link {
+            margin-top: 20px;
+        }
+        
+        .admin-link a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 TicTacToe</h1>
+            <div class="status" id="status">
+                Turno: <span id="turn" class="symbol-x">X</span>
+            </div>
+            <button class="reset" onclick="resetGame()">🔄 Nueva Partida</button>
+        </div>
+
+        <div class="board-container">
+            <div class="board" id="board">
+                <button class="cell" onclick="makeMove(0)"></button>
+                <button class="cell" onclick="makeMove(1)"></button>
+                <button class="cell" onclick="makeMove(2)"></button>
+                <button class="cell" onclick="makeMove(3)"></button>
+                <button class="cell" onclick="makeMove(4)"></button>
+                <button class="cell" onclick="makeMove(5)"></button>
+                <button class="cell" onclick="makeMove(6)"></button>
+                <button class="cell" onclick="makeMove(7)"></button>
+                <button class="cell" onclick="makeMove(8)"></button>
+            </div>
+            <div class="move-count">Movimientos: <span id="moves">0</span></div>
+        </div>
+        
+        <div class="admin-link">
+            <a href="/admin/">🔐 Panel de Administración</a>
+        </div>
+    </div>
+
+    <script>
+        let board = Array(9).fill(null);
+        let currentPlayer = 'X';
+        let gameOver = false;
+        let moveCount = 0;
+        
+        const cells = document.querySelectorAll('.cell');
+        const statusDiv = document.getElementById('status');
+        const turnSpan = document.getElementById('turn');
+        const movesSpan = document.getElementById('moves');
+        
+        function makeMove(position) {
+            if (board[position] !== null || gameOver) return;
+            
+            board[position] = currentPlayer;
+            cells[position].textContent = currentPlayer;
+            cells[position].classList.add('occupied', currentPlayer.toLowerCase());
+            cells[position].classList.add(currentPlayer === 'X' ? 'symbol-x' : 'symbol-o');
+            moveCount++;
+            movesSpan.textContent = moveCount;
+            
+            if (checkWinner()) {
+                gameOver = true;
+                statusDiv.innerHTML = `<div class="winner">🏆 <strong>Ganador:</strong> <span class="symbol-${currentPlayer.toLowerCase()}">${currentPlayer}</span></div>`;
+                return;
+            }
+            
+            if (moveCount === 9) {
+                gameOver = true;
+                statusDiv.innerHTML = '<div class="draw">🤝 <strong>¡Empate!</strong></div>';
+                return;
+            }
+            
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            turnSpan.textContent = currentPlayer;
+            turnSpan.className = currentPlayer === 'X' ? 'symbol-x' : 'symbol-o';
+        }
+        
+        function checkWinner() {
+            const lines = [
+                [0,1,2], [3,4,5], [6,7,8],
+                [0,3,6], [1,4,7], [2,5,8],
+                [0,4,8], [2,4,6]
+            ];
+            
+            for (let [a,b,c] of lines) {
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function resetGame() {
+            board = Array(9).fill(null);
+            currentPlayer = 'X';
+            gameOver = false;
+            moveCount = 0;
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.className = 'cell';
+            });
+            
+            statusDiv.innerHTML = 'Turno: <span id="turn" class="symbol-x">X</span>';
+            movesSpan.textContent = '0';
+        }
+    </script>
+</body>
+</html>

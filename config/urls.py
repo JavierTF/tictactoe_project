@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.views.generic import RedirectView
+
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
@@ -12,13 +13,13 @@ from drf_spectacular.views import (
 )
 
 urlpatterns = [
-    # Redirect root to API docs
-    path('', RedirectView.as_view(url='/api/docs/', permanent=False), name='home'),
+    # Redirect root to simple game
+    path('', RedirectView.as_view(url='/play/', permanent=False), name='home'),
 
     # Admin
     path('admin/', admin.site.urls),
     
-    # API
+    # Game app (includes both HTML pages and API)
     path('', include('apps.game.urls')),
     
     # API Documentation

@@ -20,6 +20,8 @@ from .serializers import (
     MoveSerializer
 )
 from .services import GameService
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class GameViewSet(viewsets.ModelViewSet):
@@ -241,3 +243,33 @@ class MoveViewSet(viewsets.ReadOnlyModelViewSet):
         
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    
+class GameListView(TemplateView):
+    """View for game list page."""
+    
+    template_name = 'game/game_list.html'
+    
+    def get(self, request, *args, **kwargs):
+        print("=" * 50)
+        print("GameListView.get() called")
+        print(f"Template: {self.template_name}")
+        print(f"User: {request.user}")
+        print("=" * 50)
+        return super().get(request, *args, **kwargs)
+
+
+class GameDetailView(LoginRequiredMixin, TemplateView):
+    """View for game detail/board page."""
+    
+    template_name = 'game/game_detail.html'
+    login_url = '/admin/login/'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['game_id'] = kwargs.get('game_id')
+        return context
+
+class SimpleGameView(TemplateView):
+    """Simple local TicTacToe game without authentication."""
+    
+    template_name = 'game/simple_game.html'

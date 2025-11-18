@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+
+{% block title %}Games - TicTacToe{% endblock %}
+
+{% block content %}
+<div x-data="gameListApp()" x-init="init()">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">
+            TicTacToe Games
+        </h1>
+        
+        <!-- Create new game button -->
+        <button 
+            @click="showCreateModal = true"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+            ➕ Create New Game
+        </button>
+    </div>
+
+    <!-- Loading state -->
+    <div x-show="loading" class="text-center py-8">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <p class="mt-4 text-gray-600">Loading games...</p>
+    </div>
+
+    <!-- Error state -->
+    <div x-show="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <span x-text="error"></span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6" x-show="!loading">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8">
+                <button
+                    @click="currentTab = 'my_games'"
+                    :class="currentTab === 'my_games' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                >
+                    My Games
+                </button>
+                <button
+                    @click="currentTab = 'waiting'"
+                    :class="currentTab === 'waiting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                >
+                    Waiting for Players
+                </button>
+                <button
+                    @click="currentTab = 'all'"
+                    :class="currentTab === 'all' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                >
+                    All Games
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Games grid -->
+    <div x-show="!loading && games.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="game in games" :key="game.id">
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <!-- Status badge -->
+                <div class="flex justify-between items-start mb-4">
+                    <span 
+                        :class="{
+                            'bg-orange-100 text-orange-800': game.status === 'waiting',
+                            'bg-blue-100 text-blue-800': game.status === 'in_progress',
+                            'bg-green-100 text-green-800': game.status === 'finished',
+                            'bg-gray-100 text-gray-800': game.status === 'draw'
+                        }"
+                        class="px-3 py-1 rounded-full text-xs font-semibold"
+                        x-text="getStatusText(game.status)"
+                    ></span>
+                </div>
+
+                <!-- Players -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-600">Player 1 (X):</span>
+                        <span class="font-semibold symbol-x" x-text="game.player1.username"></span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Player 2 (O):</span>
+                        <span 
+                            class="font-semibold"
+                            :class="game.player2 ? 'symbol-o' : 'text-gray-400'"
+                            x-text="game.player2 ? game.player2.username : 'Waiting...'"
+                        ></span>
+                    </div>
+                </div>
+
+                <!-- Winner -->
+                <div x-show="game.winner" class="mb-4">
+                    <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2 rounded">
+                        🏆 Winner: <span class="font-bold" x-text="game.winner?.username"></span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex space-x-2">
+                    <a 
+                        :href="`/game/${game.id}/`"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded"
+                    >
+                        View Game
+                    </a>
+                    <button
+                        x-show="game.status === 'waiting' && !isMyGame(game)"
+                        @click="joinGame(game.id)"
+                        class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
+                    >
+                        Join
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Empty state -->
+    <div x-show="!loading && games.length === 0" class="text-center py-12">
+        <p class="text-gray-600 text-lg">No games found</p>
+        <button 
+            @click="showCreateModal = true"
+            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+            Create First Game
+        </button>
+    </div>
+
+    <!-- Create game modal -->
+    <div 
+        x-show="showCreateModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+        @click.self="showCreateModal = false"
+    >
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-bold mb-4">Create New Game</h3>
+            
+            <form @submit.prevent="createGame()">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Opponent Username (optional)
+                    </label>
+                    <input
+                        x-model="newGame.player2_username"
+                        type="text"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="Leave empty for open game"
+                    >
+                </div>
+
+                <div class="flex space-x-2">
+                    <button
+                        type="submit"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                        Create
+                    </button>
+                    <button
+                        type="button"
+                        @click="showCreateModal = false"
+                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function gameListApp() {
+        return {
+            games: [],
+            loading: true,
+            error: null,
+            currentTab: 'my_games',
+            showCreateModal: false,
+            newGame: {
+                player2_username: ''
+            },
+            currentUser: '{{ user.username }}',
+
+            async init() {
+                await this.loadGames();
+                
+                // Watch for tab changes
+                this.$watch('currentTab', () => {
+                    this.loadGames();
+                });
+            },
+
+            async loadGames() {
+                this.loading = true;
+                this.error = null;
+
+                try {
+                    let url = '/api/v1/games/';
+                    
+                    if (this.currentTab === 'my_games') {
+                        url = '/api/v1/games/my-games/';
+                    } else if (this.currentTab === 'waiting') {
+                        url = '/api/v1/games/waiting/';
+                    }
+
+                    const response = await fetch(url, {
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) throw new Error('Failed to load games');
+
+                    this.games = await response.json();
+                } catch (err) {
+                    this.error = err.message;
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async createGame() {
+                try {
+                    const response = await fetch('/api/v1/games/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': this.getCookie('csrftoken')
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(this.newGame)
+                    });
+
+                    if (!response.ok) throw new Error('Failed to create game');
+
+                    const game = await response.json();
+                    window.location.href = `/game/${game.id}/`;
+                } catch (err) {
+                    this.error = err.message;
+                }
+            },
+
+            async joinGame(gameId) {
+                try {
+                    const response = await fetch(`/api/v1/games/${gameId}/join/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': this.getCookie('csrftoken')
+                        },
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) throw new Error('Failed to join game');
+
+                    window.location.href = `/game/${gameId}/`;
+                } catch (err) {
+                    this.error = err.message;
+                }
+            },
+
+            isMyGame(game) {
+                return game.player1.username === this.currentUser || 
+                       game.player2?.username === this.currentUser;
+            },
+
+            getStatusText(status) {
+                const statusMap = {
+                    'waiting': 'Waiting',
+                    'in_progress': 'In Progress',
+                    'finished': 'Finished',
+                    'draw': 'Draw'
+                };
+                return statusMap[status] || status;
+            },
+
+            getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        }
+    }
+</script>
+{% endblock %}
