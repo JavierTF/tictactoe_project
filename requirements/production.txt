@@ -2,10 +2,6 @@
 
 # Production Server
 gunicorn==21.2.0
-daphne==4.1.0
 
-# Security
-django-secure==1.0.2
-
-# Monitoring (opcional)
-sentry-sdk==1.39.2
+# Database (opcional si usas PostgreSQL)
+# psycopg2-binary==2.9.9

@@ -32,9 +32,6 @@ INTERNAL_IPS = [
 # Email - Console backend para desarrollo
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# CORS - Permitir todos los orígenes en desarrollo
-CORS_ALLOW_ALL_ORIGINS = True
-
 # Logging más verbose en desarrollo
 LOGGING = {
     'version': 1,
@@ -59,12 +56,5 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-    },
-}
-
-# Channels (WebSockets) - InMemory para desarrollo sin Redis
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
     },
 }
