@@ -45,6 +45,10 @@ source venv/bin/activate
 
 3. **Instalar dependencias**
 ```bash
+# Actualizar pip
+python.exe -m pip install --upgrade pip
+
+# Instalar dependencias
 pip install -r requirements/development.txt
 ```
 
