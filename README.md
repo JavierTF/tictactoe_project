@@ -50,6 +50,10 @@ pip install -r requirements/development.txt
 
 4. **Configurar variables de entorno**
 ```bash
+# Copiar en Windows
+copy .env.example .env
+
+# Copiar en GitBash/Linux
 cp .env.example .env
 ```
 
