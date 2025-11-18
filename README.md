@@ -1,27 +1,21 @@
 # TicTacToe - Django
 
-Juego de TicTacToe (Tres en Raya) implementado con Django como prueba técnica.
+Juego de TicTacToe (Tres en Raya) implementado con Django.
 
 ## 📋 Características
 
-- ✅ Juego local para dos jugadores (misma computadora)
+- ✅ Juego local para dos jugadores
 - ✅ Interfaz simple y responsive
-- ✅ Sin necesidad de login para jugar
-- ✅ Panel de administración para gestionar partidas
 - ✅ Backend robusto con Django 5.0
 - ✅ Arquitectura limpia y escalable
-
-## 🚀 Demo
-
-![TicTacToe Screenshot](screenshot.png)
+- ✅ Juego completamente en el navegador
 
 ## 🛠️ Tecnologías
 
 - **Backend**: Django 5.0
-- **Base de datos**: SQLite (desarrollo) / PostgreSQL (producción)
-- **Frontend**: HTML5, CSS Grid, JavaScript Vanilla
-- **Estilos**: CSS Puro
-- **Testing**: Pytest
+- **Base de datos**: SQLite
+- **Frontend**: JavaScript Vanilla, CSS Grid
+- **Arquitectura**: Pensado inicialmente para que fuera online y escalable, pero llevado a versión simple.
 
 ## 📦 Instalación
 
@@ -89,138 +83,23 @@ Visita: http://127.0.0.1:8000/
 3. Haz clic en una casilla para colocar tu símbolo
 4. El turno alterna automáticamente entre X y O
 5. El juego termina cuando hay un ganador o empate
-6. Haz clic en "Nueva Partida" para jugar de nuevo
+6. Haz clic en "🔄 Nueva Partida" para jugar de nuevo
 
 ## 🔐 Panel de Administración
 
-El panel de administración permite gestionar las partidas guardadas en la base de datos.
+*Pensado inicialmente para una versión online, pero simplificado.*
+
+El panel de administración permite gestionar el sistema.
 
 **Acceso:**
 - URL: http://127.0.0.1:8000/admin/
 - Credenciales: Las que creaste con `createsuperuser`
 
 **Funcionalidades:**
-- Ver historial de partidas
-- Ver tablero visual de cada partida
-- Gestionar usuarios
-- Ver estadísticas
+- Gestión de partidas de TicTacToe
+- Gestión de usuarios del sistema
 
-## 📁 Estructura del Proyecto
-```
-tictactoe_project/
-├── apps/
-│   └── game/                   # Aplicación principal
-│       ├── migrations/         # Migraciones de base de datos
-│       ├── templates/          # Templates HTML
-│       │   └── game/
-│       │       └── simple_game.html
-│       ├── tests/              # Tests
-│       ├── admin.py            # Configuración del admin
-│       ├── models.py           # Modelos (Game, Move)
-│       ├── views.py            # Vistas
-│       ├── services.py         # Lógica de negocio
-│       ├── serializers.py      # Serializers (API)
-│       └── urls.py             # URLs de la app
-│
-├── config/                     # Configuración del proyecto
-│   ├── settings/               # Settings modulares
-│   │   ├── base.py
-│   │   ├── development.py
-│   │   └── production.py
-│   ├── urls.py                 # URLs principales
-│   ├── asgi.py                 # ASGI config
-│   └── wsgi.py                 # WSGI config
-│
-├── requirements/               # Dependencias
-│   ├── base.txt
-│   ├── development.txt
-│   └── production.txt
-│
-├── static/                     # Archivos estáticos
-├── templates/                  # Templates globales
-├── .env.example                # Variables de entorno ejemplo
-├── .gitignore
-├── manage.py
-└── README.md
-```
-
-## 🧪 Testing
-
-Ejecutar todos los tests:
-```bash
-pytest
-```
-
-Ejecutar tests con cobertura:
-```bash
-pytest --cov=apps --cov-report=html
-```
-
-Ver reporte de cobertura:
-```bash
-# En Windows
-start htmlcov/index.html
-
-# En Linux/Mac
-open htmlcov/index.html
-```
-
-## 🎨 Code Quality
-
-El proyecto incluye herramientas de calidad de código:
-```bash
-# Formatear código
-black .
-
-# Ordenar imports
-isort .
-
-# Linting
-flake8
-
-# Type checking
-mypy .
-```
-
-## 📊 Modelos de Base de Datos
-
-### Game
-Representa una partida de TicTacToe.
-
-**Campos:**
-- `id` (UUID): Identificador único
-- `player1` (FK User): Jugador 1 (X)
-- `player2` (FK User): Jugador 2 (O)
-- `status`: Estado (waiting, in_progress, finished, draw)
-- `board` (JSON): Estado del tablero
-- `current_turn`: Turno actual (X/O)
-- `winner` (FK User): Ganador
-- `created_at`, `updated_at`, `finished_at`: Timestamps
-
-### Move
-Representa un movimiento en una partida.
-
-**Campos:**
-- `id` (UUID): Identificador único
-- `game` (FK Game): Partida asociada
-- `player` (FK User): Jugador que hizo el movimiento
-- `position` (int): Posición en el tablero (0-8)
-- `symbol` (char): Símbolo (X/O)
-- `created_at`: Timestamp
-
-## 🌐 Despliegue
-
-### Variables de entorno necesarias
-```env
-SECRET_KEY=tu-clave-secreta-aqui
-DEBUG=False
-ALLOWED_HOSTS=tudominio.com
-DB_NAME=nombre_db
-DB_USER=usuario_db
-DB_PASSWORD=contraseña_db
-DB_HOST=host_db
-DB_PORT=5432
-```
+## 🌐 Despliegue (Producción)
 
 ### Comandos de producción
 ```bash
@@ -237,34 +116,17 @@ python manage.py createsuperuser
 gunicorn config.wsgi:application --bind 0.0.0.0:8000
 ```
 
-## 🤝 Contribuir
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📝 Buenas Prácticas Implementadas
-
-- ✅ Configuración modular (base, development, production)
-- ✅ Variables de entorno para secrets
-- ✅ Modelos con UUIDs para IDs públicos
-- ✅ Custom managers para queries comunes
-- ✅ Separación de lógica de negocio (services)
-- ✅ Validadores personalizados
-- ✅ Admin personalizado con visualización de tablero
-- ✅ Testing setup completo
-- ✅ Code quality tools configuradas
-- ✅ Requirements separados por entorno
-- ✅ .gitignore apropiado
-- ✅ Documentación completa
-
-## 📄 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la [MIT License](LICENSE).
+## 📁 Estructura del Proyecto
+```
+tictactoe_project/
+├── apps/game/              # Aplicación principal
+├── config/                 # Configuración Django
+├── requirements/           # Dependencias
+├── static/                 # Archivos estáticos
+├── templates/              # Templates globales
+├── manage.py
+└── README.md
+```
 
 ## 👤 Autor
 
@@ -273,15 +135,6 @@ Este proyecto es de código abierto y está disponible bajo la [MIT License](LIC
 - GitHub: [@JavierTF](https://github.com/JavierTF)
 - Repositorio: [tictactoe_project](https://github.com/JavierTF/tictactoe_project)
 
-## 🙏 Agradecimientos
-
-Proyecto desarrollado como prueba técnica demostrando conocimientos en:
-- Django y Python
-- Arquitectura de software
-- Buenas prácticas de desarrollo
-- Testing
-- Despliegue de aplicaciones web
-
 ---
 
-**¿Preguntas o sugerencias?** Abre un issue en GitHub.
+Proyecto desarrollado como prueba técnica demostrando conocimientos en Django, Python y buenas prácticas de desarrollo.
